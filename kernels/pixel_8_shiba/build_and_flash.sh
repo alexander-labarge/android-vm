@@ -46,7 +46,7 @@ echo "Syncing Stable Android Kernel Repo"
 repo init -u https://android.googlesource.com/kernel/manifest
 
 # Get android14-5.15-2024-04 Stable XML using the raw file URL
-wget -O manifest_11657131.xml https://raw.githubusercontent.com/alexander-labarge/android_dev/main/manifest_11657131.xml
+wget -O manifest_11657131.xml https://raw.githubusercontent.com/alexander-labarge/android_dev/main/kernels/pixel_8_shiba/manifest_11657131.xml
 
 # Copy the specific manifest file to the .repo directory
 cp manifest_11657131.xml ./.repo/manifests/
