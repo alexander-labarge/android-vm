@@ -9,7 +9,7 @@ set -e
 # Stable with:
 # Link: https://dl.google.com/dl/android/aosp/shiba-ap1a.240405.002.b1-factory-4eaef674.zip
 
-BASE_DIR="${HOME}/pixel8-kernel-build"
+BASE_DIR="${HOME}/pixel8-kernel-build-v5"
 DIST_DIR="${BASE_DIR}/kernel_build_finished"
 BACKUP_REPO="${BASE_DIR}/backup_repo"
 FACTORY_IMAGE_DIR="${BASE_DIR}/shiba_stable_android14-5.15"
@@ -24,15 +24,37 @@ mkdir -p "${FACTORY_IMAGE_DIR}"
 mkdir -p "${DIST_DIR}"
 mkdir -p "${BACKUP_REPO}"
 
+function extract_and_move_vbmeta() {
+    local image_zip="$1"
+    local dist_dir="$2"
+    local vbmeta_img="vbmeta.img"
+
+    echo "Extracting vbmeta.img from $image_zip..."
+    unzip -q "$image_zip" "$vbmeta_img" -d "/tmp"
+
+    # Check if vbmeta.img was extracted
+    if [[ -f "/tmp/$vbmeta_img" ]]; then
+        echo "Moving vbmeta.img to $dist_dir..."
+        mv "/tmp/$vbmeta_img" "$dist_dir"
+        echo "vbmeta.img has been successfully moved."
+    else
+        echo "Failed to extract vbmeta.img. It may not exist in the zip file."
+        return 1 # Return failure
+    fi
+}
+
 # Step 1: Bring Device Back to Stable User Release by downloading and flashing the stable build
 echo "Downloading and unzipping the stable factory image..."
 wget "${DOWNLOAD_URL}" -O "${FACTORY_IMAGE_DIR}/${ZIP_FILE}"
 unzip -q "${FACTORY_IMAGE_DIR}/${ZIP_FILE}" -d "${FACTORY_IMAGE_DIR}"
+extract_and_move_vbmeta "$IMAGE_ZIP_PATH" "$DIST_DIR"
 
 # Verify if the image zip exists and flash-all script is present.
 if [ -f "${IMAGE_ZIP_PATH}" ] && [ -f "${FLASH_ALL_SCRIPT}" ]; then
     echo "Stable image and flash script found, starting the flash process..."
     cd "${FACTORY_IMAGE_DIR}/${SUB_DIR_IN_ZIP}"
+    adb reboot bootloader
+    sleep 5
     bash ./flash-all.sh
 else
     echo "Error: Required files for flashing are missing."
@@ -46,7 +68,7 @@ echo "Syncing Stable Android Kernel Repo"
 repo init -u https://android.googlesource.com/kernel/manifest
 
 # Get android14-5.15-2024-04 Stable XML using the raw file URL
-wget -O manifest_11657131.xml https://raw.githubusercontent.com/alexander-labarge/android_dev/main/kernels/pixel_8_shiba/manifest_11657131.xml
+wget -O manifest_11657131.xml https://raw.githubusercontent.com/alexander-labarge/android_dev/main/manifest_11657131.xml
 
 # Copy the specific manifest file to the .repo directory
 cp manifest_11657131.xml ./.repo/manifests/
