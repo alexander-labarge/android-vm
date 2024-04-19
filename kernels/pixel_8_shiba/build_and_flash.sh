@@ -63,6 +63,7 @@ fi
 
 # Step 2: Get Kernel Repo
 echo "Syncing Stable Android Kernel Repo"
+cd "${BASE_DIR}"
 
 # Initialize the repository
 repo init -u https://android.googlesource.com/kernel/manifest
