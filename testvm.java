@@ -1,4 +1,4 @@
-package com.example.virtualmachineapp;
+package com.labarge.ig88vm;
 
 import android.app.Activity;
 import android.content.Context;
